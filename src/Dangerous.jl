@@ -3,21 +3,33 @@ module Dangerous
 import LinearAlgebra as LA
 import FFTW
 
+include("Units.jl")
+include("Nuclei.jl")
 include("SingleSpin.jl")
 
+module SpinSystem
 
-function propagate(rho, H, t)
+# struct System
+#     nuclei::Array{SingleSpin.Nucleus}
+# end
+
+end # module SpinSystem
+
+
+function propagate(ρ, H, t)
+    # TODO: Is there a way to accumulate the propagators so that we can halve
+    # the number of matrix multiplications?
     U = exp(-im * H * t)
-    U * rho * U'
+    return U * ρ * U'
 end
 
-function detect(rho, h_free, dt, npoints)
+function detect(ρ, Hfree, dwell, npoints)
     fid::Array{ComplexF64} = zeros(npoints)
     for i in 1:npoints
-        fid[i] = -LA.tr(rho * SingleSpin.X) - im * LA.tr(rho * SingleSpin.Y)
-        old_norm = LA.norm(rho)
-        rho = propagate(rho, h_free, dt)
-        new_norm = LA.norm(rho)
+        fid[i] = -LA.tr(ρ * SingleSpin.X) - im * LA.tr(ρ * SingleSpin.Y)
+        old_norm = LA.norm(ρ)
+        ρ = propagate(ρ, Hfree, dwell)
+        new_norm = LA.norm(ρ)
         if abs(old_norm - new_norm) >= 1e-14
             error("Norm not preserved during propagation step: $old_norm -> $new_norm")
         end
@@ -28,7 +40,7 @@ function detect(rho, h_free, dt, npoints)
     window = exp.(-k .* (1:npoints))
     fid = fid .* window
 
-    fid
+    return fid
 end
 
 # Get the spectrum of a single spin with chemical shift cs
@@ -44,7 +56,7 @@ function spectrum_single_spin(sfo1, cs, aq, td)
     fid = detect(rho, h_free, dw, td)
     x = FFTW.fftshift(FFTW.fftfreq(td, 1/dw)) ./ sfo1
     y = FFTW.fftshift(FFTW.fft(fid))
-    x, y
+    return x, y
 end
 
 end # module Dangerous
