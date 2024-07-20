@@ -41,9 +41,10 @@ axislegend()
 display(f)
 ```
 
-![spectrum](https://github.com/penelopeysm/Dangerous/assets/122629585/9a589d27-ceb6-47ae-b3b7-96ec1f69a0aa)
+![1 spin](https://github.com/user-attachments/assets/473a3535-c4fe-47d8-a2b4-6d0bd25588b2)
 
-Alternatively, if you want a couple of spins:
+
+Alternatively, if you want a couple of spins, change the definition of the spin system:
 
 ```julia
 sys = D.SpinSystem.System(
@@ -53,3 +54,6 @@ sys = D.SpinSystem.System(
     [0 30; 0 0]
 )
 ```
+
+![2 spins](https://github.com/user-attachments/assets/82a35c7a-fcf2-4c23-ad7b-d9148ad5c1f4)
+
