@@ -1,0 +1,30 @@
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: '1.10'
+
+      - name: Instantiate docs project
+        run: julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()
+
+      - name: Build docs
+        run: julia --project=docs/ --color=yes docs/make.jl
+
+      - name: Upload docs
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/build/
+          keep_files: false
+          user_name: "GitHub Actions"
+          user_email: "github-actions[bot]@users.noreply.github.com"
