@@ -1,10 +1,10 @@
-using Documenter
+using Documenter, Dangerous
 
 makedocs(
     sitename = "Do not enter!",
     format = Documenter.HTML(
         assets = [
-            asset("favicon.ico"),
+            "assets/favicon.ico",
         ]
     ),
 )
