@@ -1,5 +1,5 @@
 # Dangerous.jl
 
-```@docs
-Dangerous.SingleSpin.h_pulse(flip_angle, pulse_axis)
+```@autodocs
+Modules = [Dangerous, Dangerous.Hamiltonian, Dangerous.Hamiltonian.SingleSpin]
 ```
