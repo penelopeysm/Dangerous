@@ -15,10 +15,10 @@ jobs:
           version: '1.10'
 
       - name: Instantiate docs project
-        run: julia --project=docs -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
+        run: julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
 
       - name: Build docs
-        run: julia --project=docs --color=yes docs/make.jl
+        run: julia --project=docs/ --color=yes docs/make.jl
 
       - name: Upload docs
         uses: peaceiris/actions-gh-pages@v4
