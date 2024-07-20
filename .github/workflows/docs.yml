@@ -17,6 +17,9 @@ jobs:
         with:
           version: '1.10'
 
+      - name: Cache Julia dependencies
+        uses: julia-actions/cache@v2
+
       - name: Instantiate docs project
         run: julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
 
