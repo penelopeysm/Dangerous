@@ -18,7 +18,7 @@ function propagate(ρ, H::Matrix{<:Frequency}, t::Time)
     return U * ρ * U'
 end
 
-function detect(sys, nuc, ρ, dwell::Time, npoints)
+function detect_fid(sys, nuc, ρ, dwell::Time, npoints)
     fid = zeros(ComplexF64, npoints)
     x, y = Hamiltonian.detection_operators(sys, nuc)
     Hfree = Hamiltonian.h_free(sys)
@@ -40,6 +40,20 @@ function detect(sys, nuc, ρ, dwell::Time, npoints)
     return fid
 end
 
+function detect_spectrum(sys, nuc, ρ, dwell::Time, npoints)
+    fid = detect_fid(sys, nuc, ρ, dwell, npoints)
+    # Units are a bit of a faff here... but it's worth getting them right
+    # The FFT library doesn't convert seconds into Hz correctly, so we do it
+    # manually
+    x_hz = FFTW.fftshift(FFTW.fftfreq(npoints, 1 / ustrip(u"s", dwell))) * u"Hz"
+    # Then convert to ppm. We need to strip the units so that the plotting
+    # library doesn't get confused
+    x_ppm = uconvert.(NoUnits, 1e6 * x_hz / (sys.magnetic_field * γ(nuc)))
+    # This one's easy!
+    y = FFTW.fftshift(FFTW.fft(fid))
+    return x_ppm, y
+end
+
 # Get the spectrum of a spin system
 function spectrum(sys, aq::Time, td)
     # Start with a 90(-y) pulse. Note the hacky dimensions for an instantaneous pulse,
@@ -50,17 +64,7 @@ function spectrum(sys, aq::Time, td)
 
     # Then detect and Fourier transform
     dw = aq / td
-    fid = detect(sys, Nuclei.H1, ρ, dw, td)
-    # Units are a bit of a faff here... but it's worth getting them right
-    # The FFT library doesn't convert seconds into Hz correctly, so we do it
-    # manually
-    x_hz = FFTW.fftshift(FFTW.fftfreq(td, 1 / ustrip(u"s", dw))) * u"Hz"
-    # Then convert to ppm. We need to strip the units so that the plotting
-    # library doesn't get confused
-    x_ppm = uconvert.(NoUnits, 1e6 * x_hz / (sys.magnetic_field * γ(Nuclei.H1)))
-    # This one's easy!
-    y = FFTW.fftshift(FFTW.fft(fid))
-    return x_ppm, y
+    return detect_spectrum(sys, Nuclei.H1, ρ, dw, td)
 end
 
 end # module Dangerous

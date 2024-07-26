@@ -9,7 +9,7 @@ using ..Units: MagneticField
     System(
         magnetic_field::MagneticField,
         nuclei::Vector{Nucleus},
-        chemical_shifts::Vector{Float64},
+        chemical_shifts::Vector{<:Real},
         couplings::Matrix{Unitful.Frequency}
     )
 
@@ -27,13 +27,13 @@ Fields:
 struct System
     magnetic_field::MagneticField
     nuclei::Vector{Nucleus}
-    chemical_shifts::Vector{Float64}
+    chemical_shifts::Vector{<:Real}
     couplings::Matrix{Frequency}
 
     function System(
         magnetic_field::MagneticField,
         nuclei::Vector{Nucleus},
-        chemical_shifts::Vector{Float64},
+        chemical_shifts::Vector{<:Real},
         couplings::Matrix{<:Frequency},
     )
         n = length(nuclei)
