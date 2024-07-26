@@ -1,0 +1,3 @@
+[deps]
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+Dangerous = "9c9ee556-c2d8-4361-9964-ab80feb8e751"
