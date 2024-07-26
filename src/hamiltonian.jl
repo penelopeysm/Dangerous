@@ -139,6 +139,17 @@ function ρ_eq(sys)
     return ρ / norm(ρ)
 end
 
+"""
+    detection_operators(sys, nuc)
+
+Generate the relevant operators for detecting a given nucleus:
+
+```math
+X = \\sum_i I_{ix}, \\quad Y = \\sum_i I_{iy}
+```
+
+where the sum is over all spins of the given nucleus.
+"""
 function detection_operators(sys, nuc)
     n = length(sys.nuclei)
     indices = findall(==(nuc), sys.nuclei)
@@ -158,7 +169,8 @@ where ``\\Omega_{0,i} = -\\gamma_i B_0 - \\omega_{\\text{ref},i}`` is the offset
 """
 function h_offset(sys)
     n = length(sys.nuclei)
-    return sum([2π * sys.magnetic_field * γ(sys.nuclei[i]) * (sys.chemical_shifts[i] / 1e6) * Z(i, n) for i in 1:n])
+    offsets = sys.magnetic_field .* γ.(sys.nuclei) .* (sys.chemical_shifts[i] - sys.transmitter_offset[sys.nuclei[i]] for i in 1:n) / 1e6
+    return sum([2π * offsets[i] * Z(i, n) for i in 1:n])
 end
 
 """
