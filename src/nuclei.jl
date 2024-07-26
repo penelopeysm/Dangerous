@@ -1,11 +1,8 @@
-module Nuclei
+"""
+    Nucleus
 
-using ..Units
-
-using Unitful
-import UnitfulEquivalences: uconvert
-using DimensionfulAngles
-
+The nuclei that we can simulate. These are all spin-1/2.
+"""
 @enum Nucleus begin
     H1
     C13
@@ -32,5 +29,3 @@ function γ(n::Nucleus)
 end
 
 export γ
-
-end # module Nuclei

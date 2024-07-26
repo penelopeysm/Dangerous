@@ -1,12 +1,3 @@
-module Hamiltonian
-
-using ..SpinSystem: System
-using ..Nuclei: γ
-using Unitful: @u_str, Frequency, ustrip
-using LinearAlgebra: norm, I, kron
-
-
-
 """
     σ_x
 
@@ -235,5 +226,3 @@ function h_pulse(sys, nuc, ω1::Frequency, φ)
     single_spin_op = cos(φ) * σ_x + sin(φ) * σ_y
     return sum([ω1 * op1(i, n, single_spin_op) for i in indices])
 end
-
-end  # module Hamiltonian
