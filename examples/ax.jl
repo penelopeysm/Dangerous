@@ -2,13 +2,14 @@ using Dangerous: Nuclei, SpinSystem, spectrum
 using Unitful: @u_str
 
 sys = SpinSystem.System(
-    22.1u"T",
+    14.1u"T",
+    Dict(Nuclei.H1 => 4.7),
     [Nuclei.H1, Nuclei.H1],
-    [1, -2],
+    [1.5, 7],
     [0 30; 0 0]u"Hz"
 )
 
-freq, spec = spectrum(sys, 3u"s", 32768)
+freq, spec = spectrum(sys, 20, 32768)
 
 using CairoMakie
 f = Figure()
