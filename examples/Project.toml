@@ -1,4 +1,5 @@
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 Dangerous = "9c9ee556-c2d8-4361-9964-ab80feb8e751"
+GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"

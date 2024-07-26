@@ -126,8 +126,8 @@ function ρ_eq(sys)
     # Dimensions can be just removed, since the only effect is to scale
     # the density matrix by a constant factor
     ρ = sum([ustrip(u"MHz/T", γ(sys.nuclei[i])) * Z(i, n) for i in 1:n])
-    # Normalise, which seems to give a bit more numerical stability
-    return ρ / norm(ρ)
+    # Give it a sensible magnitude
+    return ρ / ustrip(u"MHz/T", γ(H1))
 end
 
 """

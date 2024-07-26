@@ -1,8 +1,11 @@
 using Dangerous
+using Logging
 using Unitful: @u_str
 
+global_logger(ConsoleLogger(stderr, Info))
+
 sys = System(
-    14.1u"T",   # 600 MHz 1H
+    14.1u"T",
     Dict(H1 => 1.7),
     [H1],
     [1.5],

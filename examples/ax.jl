@@ -1,15 +1,18 @@
 using Dangerous
+using Logging
 using Unitful: @u_str
+
+global_logger(ConsoleLogger(stderr, Info))
 
 sys = System(
     14.1u"T",
     Dict(H1 => 4.7),
     [H1, H1],
-    [1.5, 7],
+    [1.5, 9],
     [0 30; 0 0]u"Hz"
 )
 
-freq, spec = zg(sys, H1, 20, 32768)
+freq, spec = zg(sys, H1, 15, 32768)
 
 using CairoMakie
 f = Figure()

@@ -1,12 +1,13 @@
 module Dangerous
 
+using DimensionfulAngles
+using DimensionfulAngles: Periodic, radᵃ, 𝐀
+using FFTW: fft, fftshift, fftfreq
+using LinearAlgebra: tr, norm, I, kron
+using Logging: @debug, @info, @warn, @error
 using Unitful
 using Unitful: 𝐈, 𝐓, 𝐌, Time, Frequency, NoUnits
 using UnitfulEquivalences
-using DimensionfulAngles
-using DimensionfulAngles: Periodic, radᵃ, 𝐀
-using LinearAlgebra: tr, norm, I, kron
-using FFTW: fft, fftshift, fftfreq
 
 export H1, C13, F19, N15, P31
 export System
