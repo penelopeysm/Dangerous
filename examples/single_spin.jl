@@ -12,13 +12,13 @@ sys = System(
     [0.0u"Hz";;]
 )
 
-freq, spec = zg(sys, H1, 20, 32768)
+spec = zg(sys, H1, 20, 32768)
 
 using CairoMakie
 f = Figure()
 ax = Axis(f[1, 1], xlabel="Chemical shift (ppm)", ylabel="Intensity", title="Spectrum")
 ax.xreversed = true
-lines!(ax, freq, real.(spec), color=:blue, label="Real")
-lines!(ax, freq, imag.(spec), color=:orange, label="Imaginary")
+lines!(ax, spec.x, real.(spec.y), color=:blue, label="Real")
+lines!(ax, spec.x, imag.(spec.y), color=:orange, label="Imaginary")
 axislegend()
 display(f)

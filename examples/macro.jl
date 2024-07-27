@@ -25,3 +25,10 @@ end
 @pulse_sequence sys begin
     my_pulse_instant(H1, π / 2, :_y)
 end
+
+
+
+@macroexpand @pulse_sequence sys begin
+    pulse_instant(H1, π / 2, :_y)
+    pulse_instant(H1, π, :x)
+end

@@ -1,4 +1,8 @@
-function add_args(expr)
+function add_args(line_number_node::LineNumberNode)
+    return line_number_node
+end
+
+function add_args(expr::Expr)
     # rewrite f(a, b, c, ...) into 
     # ρ = f(ρ, sys, a, b, c, ...)
     #
@@ -21,7 +25,8 @@ end
 macro pulse_sequence(sys, sequence_expr)
     return Expr(:block,
         :(ρ = SpinSystemState(ρ_eq($(esc(sys))))),
-        add_args(sequence_expr.args[2]),
+        [add_args(expr) for expr in sequence_expr.args]...,
+        # add_args(sequence_expr.args[2]),
         :(return collapse(ρ))
     )
 end

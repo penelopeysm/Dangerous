@@ -55,11 +55,51 @@ function collapse(state::SpinSystemState)
 end
 
 """
-    detect_fid(sys, nuc, ρ, dwell, npoints)
+    FID(x, y, nuc)
 
-Detect a free induction decay.
+A 1D free induction decay.
+
+# Fields
+- `x`: the time axis
+- `y`: the complex signal
+- `nuc`: the nucleus that was detected
 """
-function detect_fid(sys, nuc, ρ, dwell::Time, npoints)
+struct FID1D
+    x::Vector{<:Time}
+    y::Vector{ComplexF64}
+    nuc::Nucleus
+    sys::System
+    ρ::Matrix{ComplexF64}
+end
+
+"""
+    Spectrum(x, y, nuc)
+
+A 1D NMR spectrum.
+
+# Fields
+- `x`: the chemical shift axis
+- `x_hz`: the frequency axis
+- `y`: the complex spectrum
+- `nuc`: the nucleus that was detected
+- `sys`: the spin system
+- `ρ`: the density matrix at the end of acquisition
+"""
+struct Spectrum1D
+    x::Vector{Float64}
+    x_hz::Vector{<:Frequency}
+    y::Vector{ComplexF64}
+    nuc::Nucleus
+    sys::System
+    ρ::Matrix{ComplexF64}
+end
+
+"""
+    detect_fid_1d(sys, nuc, ρ, dwell, npoints)
+
+Detect a 1D free induction decay.
+"""
+function detect_fid_1d(sys, nuc, ρ, dwell::Time, npoints)
     if !(nuc in sys.nuclei)
         @warn "There are no $nuc nuclei in the system. You will not see any signal."
     end
@@ -76,39 +116,39 @@ function detect_fid(sys, nuc, ρ, dwell::Time, npoints)
         end
     end
 
+    time_points = collect((1:npoints) * dwell)
+
     # Fake relaxation
     T2 = 0.5u"s"
-    window = @. exp((1:npoints) * -dwell / T2)
+    window = exp.(-time_points / T2)
     fid = fid .* window
 
-    return fid
+    return FID1D(time_points, fid, nuc, sys, ρ)
 end
 
 """
     detect_spectrum(sys, nuc, ρ, dwell, npoints)
 
-Detect a spectrum. Returns a tuple of the frequency axis and the spectrum.
+Detect a 1D NMR spectrum (with Fourier transformation)..
 """
 function detect_spectrum(sys, nuc, ρ, dwell::Time, npoints)
     if !(haskey(sys.transmitter_offset, nuc))
         error("A transmitter offset for $nuc was not specified in the spin system.")
     end
-    fid = detect_fid(sys, nuc, ρ, dwell, npoints)
+    fid = detect_fid_1d(sys, nuc, ρ, dwell, npoints)
     # Units are a bit of a faff here... but it's worth getting them right
     resonance_frequency = sys.magnetic_field * γ(nuc)
     # The FFT library doesn't convert seconds into Hz correctly, so we do it
     # manually. We then need to tack on the transmitter offset
     offset_hz = sys.transmitter_offset[nuc] * resonance_frequency / 1e6
-    x_hz = fftshift(fftfreq(npoints, 1 / ustrip(u"s", dwell))) * u"Hz" .+ offset_hz
-    # println(collect(x_hz))
-    # println(collect(x_hz / resonance_frequency))
+    # Need to collect(x_hz) first otherwise it leads to a weird bug with units
+    x_hz = collect(fftshift(fftfreq(npoints, 1 / ustrip(u"s", dwell))) * u"Hz" .+ offset_hz)
     # Then convert to ppm. We need to strip the units so that the plotting
     # library doesn't get confused
-    # Need to collect(x_hz) first otherwise it leads to a weird bug with units
-    x_ppm = uconvert.(NoUnits, collect(x_hz) / resonance_frequency) * 1e6
+    x_ppm = uconvert.(NoUnits, x_hz / resonance_frequency) * 1e6
     # This one's easy!
-    y = fftshift(fft(fid))
-    return x_ppm, y
+    y = fftshift(fft(fid.y))
+    return Spectrum1D(x_ppm, x_hz, y, nuc, sys, fid.ρ)
 end
 
 """
