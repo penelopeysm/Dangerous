@@ -20,12 +20,12 @@ sys = System(
     spec = detect_spectrum_1d(H1, 15, 32768)
 end
 
-using GLMakie
+using CairoMakie
 f = Figure()
 ax = Axis(f[1, 1], xlabel="Chemical shift (ppm)", ylabel="Intensity", title="Spectrum")
 ax.xreversed = true
 lines!(ax, spec.x, real.(spec.y), color=:blue, label="Real")
-# lines!(ax, spec.x, imag.(spec.y), color=:orange, label="Imaginary")
+lines!(ax, spec.x, imag.(spec.y), color=:orange, label="Imaginary")
 axislegend()
 display(f)
 
