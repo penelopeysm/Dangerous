@@ -5,15 +5,12 @@ function add_args(expr)
     if expr.head != :call
         error("Expected a call expression")
     end
-    # Try to get the function name from a lookup. Otherwise assume it's a
-    # user-defined function and escape it.
-    func = get(_MACRO_LOOKUP, expr.args[1], esc(expr.args[1]))
     return Expr(
         Symbol("="),
         :ρ,
         Expr(
             expr.head,           # This is just a symbol, don't escape it
-            func,                # The function we're applying
+            esc(expr.args[1]),   # Escape this because it's the function name
             :ρ,                  # Don't escape this because it's defined in the macro
             esc(:sys),           # Escape this because it's passed in
             [esc(x) for x in expr.args[2:end]]...  # Escape the rest of the arguments
@@ -44,10 +41,12 @@ function pulse_instant(nuc, angle, phase)
     nuc, angle, phase  # To silence LSP
 end
 
-function _psmacro_pulse_instant(ρ, sys, nuc, angle, phase)
+"""
+    pulse_instant(ρ, sys, nuc, angle, phase)
+
+Applies an instantaneous pulse (with parameters as above) to the spin system
+`sys` with the state `ρ`.
+"""
+function pulse_instant(ρ, sys, nuc, angle, phase)
     return propagate(ρ, h_pulse(sys, nuc, angle * u"Hz", phase), 1u"s")
 end
-
-const _MACRO_LOOKUP = Dict(
-    :pulse_instant => :_psmacro_pulse_instant
-)
