@@ -94,16 +94,28 @@ struct Spectrum1D
     ρ::Matrix{ComplexF64}
 end
 
+
 """
-    detect_fid_1d(sys, nuc, ρ, dwell, npoints)
+    detect_fid_1d(nuc, dwell, npoints)
+
+NOTE: This method should only be used inside the @pulse_sequence macro.
+"""
+function detect_fid_1d(nuc, dwell::Time, npoints)
+    error("This method should only be used inside the @pulse_sequence macro.")
+    nuc, dwell, npoints  # To silence LSP
+end
+
+"""
+    detect_fid_1d(st, sys, nuc, dwell, npoints)
 
 Detect a 1D free induction decay.
 """
-function detect_fid_1d(sys, nuc, ρ, dwell::Time, npoints)
+function detect_fid_1d(st, sys, nuc, dwell::Time, npoints)
     if !(nuc in sys.nuclei)
         @warn "There are no $nuc nuclei in the system. You will not see any signal."
     end
     fid = zeros(ComplexF64, npoints)
+    ρ = collapse(st)
     x, y = detection_operators(sys, nuc)
     Hfree = h_free(sys)
     for i in 1:npoints
@@ -127,22 +139,37 @@ function detect_fid_1d(sys, nuc, ρ, dwell::Time, npoints)
 end
 
 """
-    detect_spectrum(sys, nuc, ρ, dwell, npoints)
+    detect_spectrum_1d(nuc, dwell, npoints)
+
+NOTE: This method should only be used inside the @pulse_sequence macro.
+"""
+function detect_spectrum_1d(nuc, sw, td)
+    error("This method should only be used inside the @pulse_sequence macro.")
+    nuc, sw, td# To silence LSP
+end
+
+"""
+    detect_spectrum_1d(st, sys, nuc, sw, td)
 
 Detect a 1D NMR spectrum (with Fourier transformation)..
 """
-function detect_spectrum(sys, nuc, ρ, dwell::Time, npoints)
+function detect_spectrum_1d(st, sys, nuc, sw, td)
     if !(haskey(sys.transmitter_offset, nuc))
         error("A transmitter offset for $nuc was not specified in the spin system.")
     end
-    fid = detect_fid_1d(sys, nuc, ρ, dwell, npoints)
+
+    dw = 1 / ((sw * 1e-6) * sys.magnetic_field * γ(nuc))
+    @info "detecting $(nuc): aq = $(uconvert(u"s", dw * td))"
+    @info "detecting $(nuc): dw = $(uconvert(u"µs", dw))"
+
+    fid = detect_fid_1d(st, sys, nuc, dw, td)
     # Units are a bit of a faff here... but it's worth getting them right
     resonance_frequency = sys.magnetic_field * γ(nuc)
     # The FFT library doesn't convert seconds into Hz correctly, so we do it
     # manually. We then need to tack on the transmitter offset
     offset_hz = sys.transmitter_offset[nuc] * resonance_frequency / 1e6
     # Need to collect(x_hz) first otherwise it leads to a weird bug with units
-    x_hz = collect(fftshift(fftfreq(npoints, 1 / ustrip(u"s", dwell))) * u"Hz" .+ offset_hz)
+    x_hz = collect(fftshift(fftfreq(td, 1 / ustrip(u"s", dw))) * u"Hz" .+ offset_hz)
     # Then convert to ppm. We need to strip the units so that the plotting
     # library doesn't get confused
     x_ppm = uconvert.(NoUnits, x_hz / resonance_frequency) * 1e6
@@ -171,8 +198,5 @@ function zg(sys, nuc, sw, td)
     ρ = collapse(ρ)
 
     # Then detect and Fourier transform
-    dw = 1 / ((sw * 1e-6) * sys.magnetic_field * γ(nuc))
-    @info "zg: aq = $(uconvert(u"s", dw * td))"
-    @info "zg: dw = $(uconvert(u"µs", dw))"
-    return detect_spectrum(sys, nuc, ρ, dw, td)
+    return detect_spectrum_1d(ρ, sys, nuc, sw, td)
 end
