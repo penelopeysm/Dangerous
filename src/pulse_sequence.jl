@@ -60,6 +60,9 @@ end
 Detect a free induction decay.
 """
 function detect_fid(sys, nuc, ρ, dwell::Time, npoints)
+    if !(nuc in sys.nuclei)
+        @warn "There are no $nuc nuclei in the system. You will not see any signal."
+    end
     fid = zeros(ComplexF64, npoints)
     x, y = detection_operators(sys, nuc)
     Hfree = h_free(sys)
@@ -87,6 +90,9 @@ end
 Detect a spectrum. Returns a tuple of the frequency axis and the spectrum.
 """
 function detect_spectrum(sys, nuc, ρ, dwell::Time, npoints)
+    if !(haskey(sys.transmitter_offset, nuc))
+        error("A transmitter offset for $nuc was not specified in the spin system.")
+    end
     fid = detect_fid(sys, nuc, ρ, dwell, npoints)
     # Units are a bit of a faff here... but it's worth getting them right
     resonance_frequency = sys.magnetic_field * γ(nuc)

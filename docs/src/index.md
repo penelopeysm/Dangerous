@@ -9,10 +9,16 @@ Nevertheless, if you really want to, this documentation will hopefully teach you
 
 ## Installation
 
-_Dangerous_ must be installed from GitHub:
+Dangerous must be installed from GitHub:
 
 ```julia
 using Pkg; Pkg.add(url="https://github.com/penelopeysm/Dangerous.jl")
 ```
 
 Note that Dangerous does not currently provide any functionality for plotting, it just gives you the chemical shifts and the intensities at each point (i.e. the spectrum).
+
+## Basic usage
+
+Broadly speaking, it's not too dissimilar from Spinach: you will first set up a spin system (see [`Dangerous.System`](@ref)) and then run some experiment on it (like [`Dangerous.zg`](@ref)).
+
+I don't want to document this in too much detail because the interface is liable to change, so you can look at the `examples` folder for some examples of how to use Dangerous.

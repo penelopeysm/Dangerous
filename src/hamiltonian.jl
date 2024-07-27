@@ -144,6 +144,9 @@ where the sum is over all spins of the given nucleus.
 function detection_operators(sys, nuc)
     n = length(sys.nuclei)
     indices = findall(==(nuc), sys.nuclei)
+    if isempty(indices)
+        return zeros(Float64, 2^n, 2^n)
+    end
     return sum([X(i, n) for i in indices]), sum([Y(i, n) for i in indices])
 end
 
@@ -213,6 +216,9 @@ function h_pulse(sys, nuc, ω1::Frequency, φ)
     n = length(sys.nuclei)
     # Assume that pulses only apply to one nucleus
     indices = findall(==(nuc), sys.nuclei)
+    if isempty(indices)
+        return zeros(Float64, 2^n, 2^n) * u"Hz"
+    end
     # Convert pulse phase to radians if needed
     if φ === :x
         φ = 0
