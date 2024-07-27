@@ -12,11 +12,13 @@ using UnitfulEquivalences
 export H1, C13, F19, N15, P31
 export System
 export zg
+export @pulse_sequence, pulse_instant
 
 include("units.jl")
 include("nuclei.jl")
 include("spin_system.jl")
 include("hamiltonian.jl")
 include("pulse_sequence.jl")
+include("macro.jl")
 
 end # module Dangerous
